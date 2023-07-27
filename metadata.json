@@ -49,7 +49,7 @@
             }
         ],
         "Category": "Utilities",
-        "Description": "Display the current value of NIFTY50",
+        "Description": "Display the current value of NIFTY50 Index.",
         "Description[ar]": "الوقت بتنسيق رقميّ",
         "Description[az]": "Saat, rəqəmsal formatda göstərilir",
         "Description[be]": "Час у лічбавым фармаце",
@@ -102,7 +102,7 @@
         "Icon": "step_object_Graph",
         "Id": "com.stymbhrdwj.nifty50",
         "License": "GPL-2.0+",
-        "Name": "Stocks",
+        "Name": "Nifty50",
         "Name[af]": "Digitale horlosie",
         "Name[ar]": "ساعة رقمية",
         "Name[az]": "Rəqəmsal saat",
@@ -197,5 +197,5 @@
     },
     "X-KDE-ParentApp": "org.kde.plasmashell",
     "X-Plasma-API": "declarativeappletscript",
-    "X-Plasma-MainScript": "ui/main.qml",
+    "X-Plasma-MainScript": "ui/main.qml"
 }
