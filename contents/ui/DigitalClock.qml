@@ -719,6 +719,7 @@ MouseArea {
     Item {
     Timer 
     {
+        // TODO: Add a setting for the update interval.
         interval: 1800000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: updateStockPrice()
         }
