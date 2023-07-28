@@ -65,10 +65,6 @@ MouseArea {
     property bool wasExpanded
     property int wheelDelta: 0
 
-    // onDateFormatChanged: {
-    //     setupLabels();
-    // }
-
     onDisplayTimezoneFormatChanged: { setupLabels(); }
     onStateChanged: { setupLabels(); }
 
@@ -103,11 +99,11 @@ MouseArea {
 
     function getCurrentTime() {
         // get the time for the given timezone from the dataengine
-        var now = dataSource.data[Plasmoid.configuration.lastSelectedTimezone]["DateTime"];
+        var now = 0;
         // get current UTC time
-        var msUTC = now.getTime() + (now.getTimezoneOffset() * 60000);
+        var msUTC = 0;
         // add the dataengine TZ offset to it
-        var currentTime = new Date(msUTC + (dataSource.data[Plasmoid.configuration.lastSelectedTimezone]["Offset"] * 1000));
+        var currentTime = new Date(0);
         return currentTime;
     }
 
@@ -170,9 +166,9 @@ MouseArea {
             PropertyChanges {
                 target: dateLabel
 
-                height: 0.8 * timeLabel.height
+                height: 0.75 * timeLabel.height
                 width: dateLabel.paintedWidth
-                verticalAlignment: Text.AlignVCenter
+                verticalAlignment: Text.AlignVCenter + 1
 
                 font.pixelSize: dateLabel.height
             }
@@ -509,8 +505,6 @@ MouseArea {
                 }
                 minimumPixelSize: 1
 
-                text: "19,659.90" //Qt.formatTime(main.getCurrentTime(), main.timeFormat)
-
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
             }
@@ -545,7 +539,7 @@ MouseArea {
             minimumPixelSize: 1
 
             horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+            verticalAlignment: Text.AlignVBottom
         }
     }
     /*
@@ -624,39 +618,8 @@ MouseArea {
     }
 
     function setupLabels() {
-        var showTimezone = main.showLocalTimezone || (Plasmoid.configuration.lastSelectedTimezone !== "Local"
-                                                        && dataSource.data["Local"]["Timezone City"] !== dataSource.data[Plasmoid.configuration.lastSelectedTimezone]["Timezone City"]);
 
-        var timezoneString = "";
-
-        if (showTimezone) {
-            // format timezone as tz code, city or UTC offset
-            if (displayTimezoneFormat === 0) {
-                timezoneString = dataSource.data[lastSelectedTimezone]["Timezone Abbreviation"]
-            } else if (displayTimezoneFormat === 1) {
-                timezoneString = TimezonesI18n.i18nCity(dataSource.data[lastSelectedTimezone]["Timezone City"]);
-            } else if (displayTimezoneFormat === 2) {
-                var lastOffset = dataSource.data[lastSelectedTimezone]["Offset"];
-                var symbol = lastOffset > 0 ? '+' : '';
-                var hours = Math.floor(lastOffset / 3600);
-                var minutes = Math.floor(lastOffset % 3600 / 60);
-
-                timezoneString = "UTC" + symbol + hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
-            }
-
-            timezoneLabel.text = (main.showDate || main.oneLineMode) && Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? "(" + timezoneString + ")" : timezoneString;
-        } else {
-            // this clears the label and that makes it hidden
-            timezoneLabel.text = timezoneString;
-        }
-
-
-        if (main.showDate) {
-            dateLabel.text = "NIFTY50" //Qt.formatDate(main.getCurrentTime(), main.dateFormat);
-        } else {
-            // clear it so it doesn't take space in the layout
-            dateLabel.text = "";
-        }
+        updateStockPrice();
 
         // find widest character between 0 and 9
         var maximumWidthNumber = 0;
@@ -686,6 +649,38 @@ MouseArea {
         fontHelper.text = sizehelper.text
     }
 
+    function updateStockPrice() {
+        var url = "https://www.google.com/finance/quote/NIFTY_50:INDEXNSE";
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    var idx = xhr.responseText.indexOf("YMlKec fxKbKc");
+                    for (var end_idx = idx+15; xhr.responseText[end_idx] != '<'; end_idx++);
+                    timeLabel.text = xhr.responseText.substring(idx+15, end_idx);
+                    
+                    var idx = xhr.responseText.indexOf("<div class=\"JwB6zf V7hZne\" style=\"font-size: 12px;\">");
+                    for (var end_idx = idx+52; xhr.responseText[end_idx] != '<'; end_idx++);
+                    var subText = xhr.responseText.substring(idx+52, end_idx);
+                    var color = "";
+                    if (subText[0] == "-") {
+                        subText += "🡇";
+                        color = "#eb4e41";
+                    } else {
+                        subText += "🡅";
+                        color = "#34a853";
+                    }
+                    dateLabel.text = "<font color=\"" + color + "\">" + subText + "</font>";
+                } else {
+                    timeLabel.text = "Fail";
+                    dateLabel.text = "Fail";
+                }
+            }
+        };
+        xhr.open("GET", url);
+        xhr.send();
+    }
+
     function dateTimeChanged()
     {
         var doCorrections = false;
@@ -700,7 +695,7 @@ MouseArea {
             }
         }
 
-        var currentTZOffset = dataSource.data["Local"]["Offset"] / 60;
+        var currentTZOffset = 0;
         if (currentTZOffset !== tzOffset) {
             doCorrections = true;
             tzOffset = currentTZOffset;
@@ -718,6 +713,14 @@ MouseArea {
                 main.tzIndex = i;
                 break;
             }
+        }
+    }
+
+    Item {
+    Timer 
+    {
+        interval: 1800000; running: true; repeat: true; triggeredOnStart: true
+        onTriggered: updateStockPrice()
         }
     }
 

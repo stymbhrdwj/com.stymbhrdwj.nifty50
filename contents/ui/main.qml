@@ -23,11 +23,11 @@ Item {
     Plasmoid.backgroundHints: PlasmaCore.Types.ShadowBackground | PlasmaCore.Types.ConfigurableBackground
     property date tzDate: {
         // get the time for the given timezone from the dataengine
-        var now = dataSource.data[Plasmoid.configuration.lastSelectedTimezone]["DateTime"];
+        var now = 0;
         // get current UTC time
-        var msUTC = now.getTime() + (now.getTimezoneOffset() * 60000);
+        var msUTC = 0;
         // add the dataengine TZ offset to it
-        return new Date(msUTC + (dataSource.data[Plasmoid.configuration.lastSelectedTimezone]["Offset"] * 1000));
+        return new Date(0);
     }
 
     function initTimezones() {
@@ -60,14 +60,6 @@ Item {
         return formattedTime;
     }
 
-    function nameForZone(zone) {
-        // add the timezone string to the clock
-        var timezoneString = Plasmoid.configuration.displayTimezoneAsCode ? dataSource.data[zone]["Timezone Abbreviation"]
-                                                                          : TimezonesI18n.i18nCity(dataSource.data[zone]["Timezone City"]);
-
-        return timezoneString;
-    }
-
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.compactRepresentation: DigitalClock {
         activeFocusOnTab: true
@@ -77,7 +69,6 @@ Item {
         Accessible.description: tooltipLoader.item.Accessible.description
         Accessible.role: Accessible.Button
     }
-    Plasmoid.fullRepresentation: StockView { }
 
     Plasmoid.toolTipItem: Loader {
         id: tooltipLoader
@@ -101,7 +92,7 @@ Item {
     PlasmaCore.DataSource {
         id: dataSource
         engine: "time"
-        connectedSources: allTimezones
+        connectedSources: "None"        
         interval: Plasmoid.configuration.showSeconds ? 1000 : 60000
         intervalAlignment: Plasmoid.configuration.showSeconds ? PlasmaCore.Types.NoAlignment : PlasmaCore.Types.AlignToMinute
     }
@@ -125,10 +116,7 @@ Item {
     }
 
     Component.onCompleted: {
-        Plasmoid.setAction("clipboard", i18n("Copy to Clipboard"), "edit-copy");
-        ClipboardMenu.setupMenu(Plasmoid.action("clipboard"));
 
-        root.initTimezones();
         if (KCMShell.authorize("kcm_clock.desktop").length > 0) {
             Plasmoid.setAction("clockkcm", i18n("Adjust Date and Time…"), "clock");
         }
