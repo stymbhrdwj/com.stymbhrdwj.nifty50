@@ -7,3 +7,5 @@ This is a simple modification of the `Digital Clock` widget that displays the cu
 ### Installation
 
 Clone the repository in the directory `~/.local/share/plasma/plasmoids/` then run the command `killall plasmashell; kstart5 plasmashell` to restart `plasmashell`. Alternatively, log out and log in again.
+
+Note: This works only on Plasma 5. I am currently writing a version for Plasma 6 and will be out in a week or so.
